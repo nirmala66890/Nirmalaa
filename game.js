@@ -4,16 +4,6 @@ const scoreEl = document.getElementById("score");
 const livesEl = document.getElementById("lives");
 const goalEl = document.getElementById("goal");
 
-let score = 0;
-
-const bgm = new Audio("./shinchan_naughty.mp3");
-bgm.loop = true;
-bgm.volume = 0.5;
-
-function startBgm() {
-  bgm.play().catch(() => {});
-}
-
 const GRAVITY = 0.55;
 const WORLD_WIDTH = 2600;
 const GROUND_Y = 360;
@@ -76,9 +66,8 @@ function resetPlayer() {
 
 function resetWorld(resetLives = true) {
   state.coins = baseCoins.map((coin) => ({ ...coin, collected: false }));
-  state.enemies = baseEnemies.map((e) => ({ ...e, dir: 1, alive: true }));
-  score = 0;
-  state.score = score;
+  state.enemies = baseEnemies.map((e) => ({ ...e, dir: 1 }));
+  state.score = 0;
   state.gameOver = false;
   state.won = false;
   state.cameraX = 0;
@@ -102,14 +91,6 @@ function rectsOverlap(a, b) {
     a.y < b.y + b.h &&
     a.y + a.h > b.y
   );
-}
-
-function triggerGameOver() {
-  if (state.gameOver || state.won) return;
-  state.gameOver = true;
-  state.lives = 0;
-  goalEl.textContent = "Game Over! Press R to restart.";
-  syncHud();
 }
 
 function takeHit() {
@@ -203,8 +184,6 @@ function updatePlayer() {
 
 function updateEnemies() {
   for (const enemy of state.enemies) {
-    if (!enemy.alive) continue;
-
     enemy.x += enemy.speed * enemy.dir;
     if (enemy.x <= enemy.minX || enemy.x >= enemy.maxX) {
       enemy.dir *= -1;
@@ -215,13 +194,13 @@ function updateEnemies() {
     if (rectsOverlap({ x: p.x, y: p.y, w: p.w, h: p.h }, enemyRect)) {
       const stomped = p.vy > 2 && p.y + p.h - enemy.y < 16;
       if (stomped) {
-        enemy.alive = false;
+        enemy.x = enemy.minX;
+        enemy.dir = 1;
         p.vy = -8;
-        score += 100;
-        state.score = score;
+        state.score += 120;
         syncHud();
       } else {
-        triggerGameOver();
+        takeHit();
       }
     }
   }
@@ -234,8 +213,7 @@ function updateCoins() {
     const cRect = { x: coin.x - 10, y: coin.y - 10, w: 20, h: 20 };
     if (rectsOverlap(pRect, cRect)) {
       coin.collected = true;
-      score += 10;
-      state.score = score;
+      state.score += 50;
       syncHud();
     }
   }
@@ -302,8 +280,6 @@ function drawCoin(coin) {
 }
 
 function drawEnemy(enemy) {
-  if (!enemy.alive) return;
-
   const x = enemy.x - state.cameraX;
   const y = enemy.y;
   ctx.fillStyle = "#703c1f";
@@ -369,12 +345,6 @@ function drawFlag() {
   ctx.fill();
 }
 
-function drawCanvasScore() {
-  ctx.fillStyle = "#0b1d2a";
-  ctx.font = "bold 20px Arial";
-  ctx.fillText(`Score: ${score}`, 16, 30);
-}
-
 function render() {
   drawBackground();
   drawPlatforms();
@@ -389,7 +359,6 @@ function render() {
   }
 
   drawShinchan(state.player);
-  drawCanvasScore();
 }
 
 function tick() {
@@ -413,18 +382,9 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-window.addEventListener(
-  "click",
-  () => {
-    startBgm();
-  },
-  { once: true }
-);
-
 window.addEventListener("keyup", (event) => {
   keys[event.code] = false;
 });
 
 resetWorld(true);
-startBgm();
 tick();
