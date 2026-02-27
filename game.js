@@ -6,13 +6,48 @@ const goalEl = document.getElementById("goal");
 
 let score = 0;
 
-const bgm = new Audio("./shinchan_naughty.mp3");
+const BGM_SOURCES = [
+  "./shinchan_naughty.mp3",
+  "https://raw.githubusercontent.com/nirmala66890/Nirmalaa/main/shinchan_naughty.mp3"
+];
+
+let bgmSourceIndex = 0;
+const bgm = new Audio(BGM_SOURCES[bgmSourceIndex]);
 bgm.loop = true;
 bgm.volume = 0.5;
+bgm.preload = "auto";
+
+let bgmStarted = false;
 
 function startBgm() {
-  bgm.play().catch(() => {});
+  if (bgmStarted) return;
+
+  bgm.play()
+    .then(() => {
+      bgmStarted = true;
+    })
+    .catch(() => {});
 }
+
+function tryNextBgmSource() {
+  if (bgmSourceIndex >= BGM_SOURCES.length - 1) {
+    console.warn("BGM file gagal dimuat dari semua source.");
+    return;
+  }
+
+  bgmSourceIndex += 1;
+  bgm.src = BGM_SOURCES[bgmSourceIndex];
+  bgm.load();
+  startBgm();
+}
+
+bgm.addEventListener("canplaythrough", () => {
+  startBgm();
+});
+
+bgm.addEventListener("error", () => {
+  tryNextBgmSource();
+});
 
 const GRAVITY = 0.55;
 const WORLD_WIDTH = 2600;
@@ -413,13 +448,19 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-window.addEventListener(
-  "click",
-  () => {
+const unlockBgm = () => {
+  startBgm();
+};
+
+window.addEventListener("click", unlockBgm, { once: true });
+window.addEventListener("touchstart", unlockBgm, { once: true });
+window.addEventListener("keydown", unlockBgm, { once: true });
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
     startBgm();
-  },
-  { once: true }
-);
+  }
+});
 
 window.addEventListener("keyup", (event) => {
   keys[event.code] = false;
