@@ -1,7 +1,23 @@
-# Shinchan Jump Adventure
+# 📊 Dicoding Submission
 
-Simple browser game inspired by classic Super Mario platformers, but the hero is Shinchan.
+streamlit run dashboard/dashboard.py
 
-## Run
+## 📌 Latar Belakang
+Proyek ini dibuat untuk melakukan analisis data guna menghasilkan insight dari dataset yang digunakan.  
+Analisis dilakukan melalui tahapan data wrangling, eksplorasi data (EDA), dan visualisasi menggunakan dashboard interaktif berbasis Streamlit.
 
-Open `index.html` in any modern browser.
+---
+
+## 🎯 Tujuan
+- Mengeksplorasi pola data
+- Menemukan insight dari dataset
+- Menyajikan hasil analisis dalam bentuk dashboard interaktif
+
+---
+
+## ⚙️ Setup
+
+Install library yang dibutuhkan:
+
+```bash
+pip install -r requirements.txt
